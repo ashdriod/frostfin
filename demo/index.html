@@ -1,0 +1,53 @@
+<!doctype html>
+<!--
+  Demo of the theme on a fictional library. Uses the class names and markup of
+  jellyfin-web 10.11's Home page so dist/theme.css and dist/theme.js run
+  unchanged; a mock ApiClient stands in for the server. Not Jellyfin itself.
+  Run: npm run demo  ->  http://127.0.0.1:8099/   (?tv or ?mobile for other layouts)
+-->
+<html class="layout-desktop" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frostfin Demo</title>
+<link rel="stylesheet" href="demo.css">
+<link rel="stylesheet" href="../dist/theme.css">
+</head>
+<body>
+<div class="backdropContainer"></div>
+<div class="backgroundContainer"></div>
+
+<div class="skinHeader focuscontainer-x skinHeader-withBackground skinHeader-blurred">
+  <div class="headerTop">
+    <div class="headerLeft">
+      <button type="button" class="headerButton mainDrawerButton paper-icon-button-light" title="Menu"><span class="material-icons menu" aria-hidden="true"></span></button>
+      <h3 class="pageTitle"></h3>
+    </div>
+    <div class="headerRight">
+      <button type="button" class="headerButton headerSyncButton paper-icon-button-light" title="SyncPlay"><span class="material-icons group" aria-hidden="true"></span></button>
+      <button type="button" class="headerButton headerCastButton paper-icon-button-light" title="Cast"><span class="material-icons cast" aria-hidden="true"></span></button>
+      <button type="button" class="headerButton headerSearchButton paper-icon-button-light" title="Search"><span class="material-icons search" aria-hidden="true"></span></button>
+      <button type="button" class="headerButton headerUserButton paper-icon-button-light" title="Profile"><span class="material-icons person" aria-hidden="true"></span></button>
+    </div>
+  </div>
+  <div class="headerTabs sectionTabs">
+    <div is="emby-tabs" class="tabs-viewmenubar emby-tabs" data-index="0">
+      <div class="emby-tabs-slider" style="white-space:nowrap">
+        <button type="button" class="emby-tab-button emby-button emby-tab-button-active" data-index="0"><div class="emby-button-foreground">Home</div></button>
+        <button type="button" class="emby-tab-button emby-button" data-index="1"><div class="emby-button-foreground">Favorites</div></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mainAnimatedPages skinBody">
+  <div class="page homePage libraryPage allLibraryPage backdropPage pageWithAbsoluteTabs withTabs" data-backbutton="false">
+    <div class="tabContent pageTabContent is-active" data-index="0">
+      <div class="sections homeSectionsContainer" id="home"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

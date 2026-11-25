@@ -1,0 +1,86 @@
+name: Bug report
+description: Something looks or behaves wrong with the theme
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Before filing, please:
+        - Reload once bypassing the cache (Ctrl/Cmd+Shift+R).
+        - Check whether the problem goes away with the theme removed. If it does not, it's a Jellyfin issue.
+        - **Remove anything private** from screenshots and logs: server address, user names, API keys.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Home
+        2. Hover a Continue Watching tile
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: theme-version
+    attributes:
+      label: Theme version
+      description: From the first line of theme.css, or the release / @import URL you use.
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: input
+    id: jellyfin-version
+    attributes:
+      label: Jellyfin server version
+      description: Dashboard → General → About.
+      placeholder: 12.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client
+      multiple: true
+      options:
+        - Desktop browser
+        - Jellyfin Media Player (desktop app)
+        - Android / iOS app
+        - webOS / Tizen TV
+        - Other (describe below)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 140 on macOS 15
+  - type: dropdown
+    id: script
+    attributes:
+      label: Is the companion script (theme.js) installed?
+      options:
+        - "Yes"
+        - "No"
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: extras
+    attributes:
+      label: Other plugins, custom CSS, screenshots
+      description: Plugins that change the UI (Editor's Choice, Media Bar, Home Screen Sections…), any CSS you added after the theme, screenshots, and console errors (F12 → Console).
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I reloaded bypassing the cache and the problem is still there.
+          required: true
+        - label: I removed private details (server address, names, keys) from what I'm posting.
+          required: true

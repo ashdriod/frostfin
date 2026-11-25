@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a change or a new part of Jellyfin to style
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Which screen, what it does now, and what it should do. A reference screenshot helps.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: The problem it solves for you.
+  - type: dropdown
+    id: clients
+    attributes:
+      label: Which clients should it apply to?
+      multiple: true
+      options: [Desktop, TV layout, Mobile]

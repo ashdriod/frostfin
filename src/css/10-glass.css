@@ -1,0 +1,2497 @@
+/* ================================================= */
+/* 10. GLASS LAYER                                   */
+/* ================================================= */
+/*
+   A glass-inspired look for Jellyfin, layered on top of ElegantFin.
+
+   Design thesis: the artwork is the interface. Chrome is a thin floating
+   layer of glass; focus is shown by lifting the poster toward you,
+   rather than by outlines or color.
+
+   Rules this layer follows:
+   - Only restyles surfaces, type, color and motion. Layout geometry is left
+     to ElegantFin, which already handles Jellyfin 10.9 – 10.11 differences.
+   - Monochrome. White is the only "accent"; color is reserved for meaning
+     (favorite, destructive, played).
+   - Glass lives on the floating layer only (tab bar, header buttons, menus,
+     dialogs, player controls), never on content.
+   - Motion uses spring curves (critically damped, no overshoot) and respects
+     reduced motion, reduced transparency and increased contrast.
+   - The dashboard (admin pages) is left readable and mostly untouched.
+*/
+
+/* ------------------------------------------------- */
+/* 10.0 AMOLED black                                  */
+/* ------------------------------------------------- */
+/* Every container behind artwork is pure #000 so no grey or white band can
+   show around a backdrop, poster or hero. Backdrops fade into black. */
+
+/* Not while a video is on screen: Jellyfin draws the video BEHIND the page,
+   so any opaque page layer in front of it hides the picture (black screen
+   with working audio). Playback pages must stay transparent. */
+html {
+    background-color: #000000;
+}
+
+html:not(:has(.videoPlayerContainer)) body,
+html:not(:has(.videoPlayerContainer)) .skinBody,
+html:not(:has(.videoPlayerContainer)) .mainAnimatedPages,
+html:not(:has(.videoPlayerContainer)) .page,
+html:not(:has(.videoPlayerContainer)) .libraryPage,
+html:not(:has(.videoPlayerContainer)) .homePage,
+html:not(:has(.videoPlayerContainer)) .itemDetailPage,
+html:not(:has(.videoPlayerContainer)) #itemDetailPage,
+html:not(:has(.videoPlayerContainer)) .detailPageWrapperContainer,
+html:not(:has(.videoPlayerContainer)) .detailPagePrimaryContainer,
+html:not(:has(.videoPlayerContainer)) .detailPageSecondaryContainer,
+html:not(:has(.videoPlayerContainer)) .detailPageContent,
+html:not(:has(.videoPlayerContainer)) .detailRibbon,
+html:not(:has(.videoPlayerContainer)) .homeSectionsContainer,
+html:not(:has(.videoPlayerContainer)) .padded-bottom-page,
+html:not(:has(.videoPlayerContainer)) .pageContainer,
+html:not(:has(.videoPlayerContainer)) .backgroundContainer,
+html:not(:has(.videoPlayerContainer)) .backgroundContainer.withBackdrop,
+html:not(:has(.videoPlayerContainer)) .backdropContainer {
+    background-color: #000000 !important;
+}
+
+/* Playback: everything in front of the video is see-through */
+html:has(.videoPlayerContainer) body,
+html:has(.videoPlayerContainer) .skinBody,
+html:has(.videoPlayerContainer) .mainAnimatedPages,
+html:has(.videoPlayerContainer) .page,
+html:has(.videoPlayerContainer) .backgroundContainer,
+html:has(.videoPlayerContainer) .backdropContainer,
+#videoOsdPage,
+#videoOsdPage.page {
+    background: transparent !important;
+}
+
+.layout-desktop .detailPageWrapperContainer,
+.layout-tv .detailPageWrapperContainer {
+    background-color: transparent !important;
+}
+
+/* Backdrop image: dark overlay on top, no light haze, fades to black */
+/* The page-level backdrop (home, libraries, and the copy that banner plugins
+   like Spotlight sync behind themselves) must never show at full brightness:
+   it sits behind translucent banners and washes them out. Heavy blur plus
+   ~22% brightness keeps a faint colour glow on pure black. */
+.backdropImage {
+    background-color: #000000 !important;
+    -webkit-filter: blur(24px) saturate(120%) brightness(0.22) !important;
+    filter: blur(24px) saturate(120%) brightness(0.22) !important;
+}
+
+/* Detail-page hero keeps its sharpness; it fades to black via gradient */
+.itemBackdrop {
+    background-color: #000000 !important;
+    filter: none !important;
+}
+
+/* Overlay layers a banner plugin may add next to the backdrop */
+.abyss-spotlight-backdrop-layer {
+    -webkit-filter: blur(24px) saturate(120%) brightness(0.22) !important;
+    filter: blur(24px) saturate(120%) brightness(0.22) !important;
+}
+
+.backgroundContainer.withBackdrop::before,
+.backgroundContainer.withBackdrop::after,
+.backdropContainer::before,
+.backdropContainer::after {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.55) 55%, #000000 100%) !important;
+    mix-blend-mode: normal !important;
+}
+
+.itemBackdrop::before {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 30%) !important;
+}
+
+/* Posters: no light frame or edge around any image */
+.cardScalable,
+.cardBox,
+.cardImageContainer,
+.detailImageContainer .cardScalable,
+.detailImageContainer .cardBox {
+    border: none !important;
+    outline: none;
+    background-color: #000000 !important;
+}
+
+.cardImageContainer {
+    box-shadow: none !important;
+}
+
+/* 10.11's React cards (library grids) put an empty a.cardImageContainer
+   inside the hover overlay as a click target. With the black fill above it
+   became a black sheet over the poster on hover. It must stay see-through. */
+.cardOverlayContainer > .cardImageContainer,
+.cardOverlayContainer .cardImageContainer {
+    background: transparent !important;
+}
+
+/* Hero banners: black end-stop at every edge */
+.editorsChoiceItemBanner,
+.editorsChoiceContainer,
+#slides-container,
+.slides-container {
+    background-color: #000000 !important;
+}
+
+/* Header and drawer text must stay legible on black */
+.skinHeader,
+.skinHeader-blurred,
+.skinHeader-withBackground {
+    background-color: transparent !important;
+}
+
+/* Logo → Ashdriod ---------------------------------- */
+/* CSS can't edit the browser tab title or the app name in the manifest; it
+   replaces the visible header and login logos. */
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo,
+.pageTitle.pageTitleWithLogo {
+    background-image: none !important;
+    width: auto !important;
+    min-width: 7em;
+    height: 1.5em;
+    display: flex !important;
+    align-items: center;
+    -webkit-box-orient: horizontal;
+}
+
+.pageTitleWithLogo::after,
+.pageTitleWithDefaultLogo::after {
+    content: "Ashdriod";
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+#loginPage .loginLogo,
+#loginPage .imgLogoIcon,
+.loginPage .imgLogoIcon,
+.splashLogo,
+.imgLogoIcon {
+    background-image: none !important;
+    content: none;
+}
+
+#loginPage .imgLogoIcon::after,
+.loginPage .imgLogoIcon::after {
+    content: "Ashdriod";
+    display: block;
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-align: center;
+}
+
+/* ------------------------------------------------- */
+/* 10.1 Tokens                                       */
+/* ------------------------------------------------- */
+
+:root {
+    /* ---- User options (change these) ---- */
+
+    /* 1 = glass on chrome, 0 = solid surfaces (faster on old TVs) */
+    --frost-glass: 1;
+
+    /* How far a focused poster lifts. 1.08 feels natural on a TV */
+    --frost-focus-scale: 1.07;
+
+    /* ---- Palette ---- */
+    --frost-canvas: #000000;
+    --frost-canvas-raised: #0e0e10;
+    --frost-label: #ffffff;                       /* 21:1 on canvas */
+    --frost-label-secondary: rgba(235, 235, 245, 0.62); /* ≈ #929297, 6.8:1 on canvas */
+    --frost-label-tertiary: rgba(235, 235, 245, 0.38);  /* non-text only */
+    --frost-separator: rgba(255, 255, 255, 0.10);
+    --frost-fill: rgba(255, 255, 255, 0.10);
+    --frost-fill-strong: rgba(255, 255, 255, 0.18);
+    --frost-red: #ff453a;
+    --frost-green: #30d158;
+
+    /* ---- Materials ---- */
+    --frost-glass-bg: rgba(38, 38, 42, 0.52);
+    --frost-glass-bg-thick: rgba(28, 28, 31, 0.72);
+    --frost-glass-blur: blur(28px) saturate(180%);
+    --frost-glass-blur-thick: blur(44px) saturate(170%);
+    /* bright top edge = light catching the material */
+    --frost-glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.10),
+                      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --frost-glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.38);
+    --frost-lift-shadow: 0 28px 56px -12px rgba(0, 0, 0, 0.85),
+                       0 10px 20px -8px rgba(0, 0, 0, 0.6);
+
+    /* ---- Shape ---- */
+    --frost-radius-card: 14px;
+    --frost-radius-panel: 26px;
+    --frost-radius-control: 14px;
+    --frost-radius-pill: 999px;
+
+    /* ---- Motion ----
+       Critically damped springs (damping 1.0) sampled into linear().
+       response 0.3 s → settles in ~440 ms; response 0.4 s → ~590 ms. */
+    --frost-spring: linear(0, 0.094, 0.274, 0.455, 0.608, 0.726, 0.812, 0.873, 0.916, 0.944,
+                         0.964, 0.976, 0.985, 0.99, 0.994, 0.996, 0.997, 0.998, 1);
+    --frost-spring-fast: 440ms;
+    --frost-spring-slow: 590ms;
+    --frost-press: 90ms ease-out;
+
+    /* ---- Re-point ElegantFin's own variables ---- */
+    --darkerGradientPoint: #000000;
+    --darkerGradientPointAlpha: rgba(0, 0, 0, 0.82);
+    --lighterGradientPoint: #000000;
+    --lighterGradientPointAlpha: rgba(14, 14, 16, 0.85);
+    --gradientPointAlpha: rgba(0, 0, 0, 0.25);
+    --headerColor: transparent;
+    --drawerColor: var(--frost-glass-bg-thick);
+    --borderColor: rgba(255, 255, 255, 0.14);
+    --darkerBorderColor: transparent;
+    --lighterBorderColor: rgba(255, 255, 255, 0.16);
+    --selectorBackgroundColor: #2c2c2e;
+    --selectorBackgroundColorAlpha: rgba(44, 44, 46, 0.6);
+    --activeColorAlpha: rgba(255, 255, 255, 0.14);
+    --activeColor: rgba(255, 255, 255, 0.16);
+    --uiAccentColor: #ffffff;
+    --checkboxCheckedBgColor: #ffffff;
+    --osdSeekBarPlayedColor: #ffffff;
+    --osdSeekBarBufferedColorAlpha: rgba(255, 255, 255, 0.28);
+    --osdSeekBarThumbColor: #ffffff;
+    --btnSubmitColor: #ffffff;
+    --btnSubmitBorderColor: transparent;
+    --btnDeleteColor: var(--frost-red);
+    --btnDeleteBorderColor: transparent;
+    --countIndicatorColor: rgba(0, 0, 0, 0.6);
+    --textColor: #ffffff;
+    --dimTextColor: #929297;
+    --backgroundGradient: #000000;
+    --cardBackgroundGradient: #0e0e10;
+    --headerColorGradient: linear-gradient(180deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 55%, transparent 100%);
+    --headerColorGradientAlt: linear-gradient(180deg, rgba(0, 0, 0, 0.9), 70%, transparent);
+    --cardFooterGradient: linear-gradient(0deg, rgba(0, 0, 0, 0.85), 45%, transparent);
+    --largeRadius: var(--frost-radius-card);
+    --largerRadius: var(--frost-radius-panel);
+    --smallRadius: 10px;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+    --btnMiniPlayColor: rgba(38, 38, 42, 0.6);
+    --btnMiniPlayBorderColor: rgba(255, 255, 255, 0.16);
+    --cardHoverEffect: none;          /* no light sweep; focus lifts instead */
+    --libraryLabelVisibility: block;  /* label library tiles */
+}
+
+/* Glass switch: --frost-glass: 0 turns materials into solid surfaces */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root {
+        --frost-glass-bg: rgba(38, 38, 42, 0.96);
+        --frost-glass-bg-thick: rgba(28, 28, 31, 0.98);
+    }
+}
+
+/* ------------------------------------------------- */
+/* 10.2 Typography                                    */
+/* ------------------------------------------------- */
+/* System font first (with its own optical sizing and tracking). Inter, loaded by the base layer, is the fallback elsewhere.
+   Icons keep their own font: .material-icons sets it with higher specificity. */
+
+html {
+    font-family: system-ui, "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+.emby-button,
+.emby-input,
+.emby-select,
+.emby-textarea {
+    font-family: inherit;
+}
+
+body {
+    color: var(--frost-label);
+    background-color: var(--frost-canvas);
+}
+
+/* Size-specific tracking: tighten as type grows, leave body near 0 */
+h1,
+.itemName,
+.pageTitle,
+.detailPagePrimaryContainer h1 {
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+    font-weight: 700;
+}
+
+h2,
+h3,
+.sectionTitle {
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+}
+
+.layout-desktop .sectionTitle,
+.layout-tv .sectionTitle,
+.sectionTitle {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.layout-desktop .sectionTitle,
+.layout-tv .sectionTitle {
+    font-size: 1.4rem !important;
+}
+
+.sectionTitle a,
+.sectionTitle-link,
+.sectionTitleTextButton {
+    color: inherit !important;
+}
+
+.sectionTitleTextButton .material-icons,
+.sectionTitle-link .material-icons {
+    color: var(--frost-label-secondary);
+    transition: transform var(--frost-spring-fast) var(--frost-spring), color 150ms ease;
+}
+
+.sectionTitleTextButton:hover .material-icons,
+.sectionTitleTextButton:focus-visible .material-icons {
+    color: var(--frost-label);
+    transform: translateX(0.2em);
+}
+
+.secondaryText,
+.fieldDescription,
+.cardText-secondary,
+.listItemBodyText.secondary,
+.itemMiscInfo,
+.itemMiscInfo-secondary {
+    color: var(--frost-label-secondary);
+}
+
+.overview,
+.itemOverview,
+.detail-clamp-text {
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.5;
+}
+
+/* ------------------------------------------------- */
+/* 10.3 Canvas                                        */
+/* ------------------------------------------------- */
+
+.backgroundContainer,
+.backgroundContainer.withBackdrop {
+    background: var(--frost-canvas) !important;
+}
+
+::selection {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Thin, quiet scrollbars on desktop */
+.layout-desktop ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.layout-desktop ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.layout-desktop ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ------------------------------------------------- */
+/* 10.4 Header & floating tab bar                     */
+/* ------------------------------------------------- */
+/* The header itself stays clear; the base layer's soft blur mask provides
+   the scroll-edge effect. Only the controls float as glass. */
+
+.skinHeader-blurred:not(.osdHeader):not(.semiTransparent) {
+    border: none;
+}
+
+/* Header round buttons: small glass discs */
+.skinHeader:not(.osdHeader) .headerRight .headerButton,
+.skinHeader:not(.osdHeader) .headerLeft .headerButton:not(.headerHomeButton):not(.mainDrawerButton) {
+    border-radius: 50%;
+    transition: background-color 150ms ease, transform var(--frost-press);
+}
+
+.layout-desktop .skinHeader:not(.osdHeader) .headerRight .headerButton:hover,
+.skinHeader:not(.osdHeader) .headerButton:focus-visible {
+    background: var(--frost-fill-strong) !important;
+    color: #fff;
+}
+
+.skinHeader .headerButton:active {
+    transform: scale(0.94);
+}
+
+.headerUserButton .headerUserButtonRound,
+.headerUserButtonRound {
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.22);
+}
+
+/* The capsule: a floating top tab bar */
+.sectionTabs .emby-tabs-slider {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15em;
+    padding: 0.3em;
+    border-radius: var(--frost-radius-pill);
+    background: var(--frost-glass-bg);
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    box-shadow: var(--frost-glass-edge), var(--frost-glass-shadow);
+}
+
+.layout-mobile .sectionTabs .emby-tabs-slider {
+    margin: 0 var(--sidePadding);
+}
+
+.sectionTabs .emby-tabs-slider .emby-tab-button,
+.layout-mobile .sectionTabs .emby-tabs-slider .emby-tab-button:first-child,
+.layout-mobile .sectionTabs .emby-tabs-slider .emby-tab-button:last-child {
+    margin: 0;
+    height: 2.4em;
+    padding: 0 1.15em;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--frost-radius-pill);
+    background: transparent;
+    color: var(--frost-label-secondary);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    transition: background-color var(--frost-spring-fast) var(--frost-spring),
+                color var(--frost-spring-fast) var(--frost-spring),
+                transform var(--frost-press);
+}
+
+.sectionTabs .emby-tabs-slider .emby-tab-button:hover {
+    color: var(--frost-label);
+    background: var(--frost-fill);
+}
+
+/* Selected tab: lighter glass pill, white label */
+.sectionTabs .emby-tabs-slider .emby-tab-button.emby-tab-button-active {
+    color: var(--frost-label);
+    background: var(--frost-fill-strong);
+    font-weight: 600;
+}
+
+/* Focused tab (remote / keyboard): solid white, black label */
+.sectionTabs .emby-tabs-slider .emby-tab-button:focus-visible,
+.sectionTabs .emby-tabs-slider .emby-tab-button.show-focus:focus,
+.layout-tv .sectionTabs .emby-tabs-slider .emby-tab-button:focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+    outline: none;
+}
+
+.sectionTabs .emby-tabs-slider .emby-tab-button:active {
+    transform: scale(0.96);
+}
+
+/* Jellyfin draws an underline indicator on some versions; the capsule replaces it */
+.emby-tab-button-active::after,
+.emby-tabs-slider .emby-tab-button-selection-bar {
+    display: none !important;
+}
+
+/* ------------------------------------------------- */
+/* 10.5 Side drawer: the floating sidebar          */
+/* ------------------------------------------------- */
+/* Jellyfin slides the whole .mainDrawer element in and out, so the drawer
+   itself stays an invisible full-height strip and the scroll container
+   inside it becomes the floating glass panel. Closed, the panel slides fully
+   off-screen as before.
+   The admin dashboard's docked drawer is excluded and keeps a plain glass strip. */
+
+:root {
+    /* Gradient glass: picks up the artwork behind it (saturate), lit
+       from the top, deepening toward the bottom */
+    --frost-sidebar-fill:
+        linear-gradient(180deg,
+            rgba(255, 255, 255, 0.16) 0%,
+            rgba(255, 255, 255, 0.07) 32%,
+            rgba(255, 255, 255, 0.03) 60%,
+            rgba(0, 0, 0, 0.18) 100%),
+        rgba(46, 42, 40, 0.42);
+    --frost-sidebar-blur: blur(40px) saturate(190%) brightness(0.9);
+    --frost-sidebar-rim:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html:not(.dashboardDocument) body:not(.dashboardDocument) .mainDrawer,
+html:not(.dashboardDocument) body:not(.dashboardDocument) .mainDrawer.drawer-open {
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.75em 0 0.75em 0.75em;
+    box-sizing: border-box;
+}
+
+html:not(.dashboardDocument) body:not(.dashboardDocument) .mainDrawer-scrollContainer {
+    height: 100%;
+    box-sizing: border-box;
+    margin: 0 !important;
+    padding: 0.85em 0.55em 1em !important;
+    border-radius: 30px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    background: var(--frost-sidebar-fill);
+    -webkit-backdrop-filter: var(--frost-sidebar-blur);
+    backdrop-filter: var(--frost-sidebar-blur);
+    box-shadow: var(--frost-sidebar-rim), 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+html:not(.dashboardDocument) body:not(.dashboardDocument) .mainDrawer-scrollContainer::-webkit-scrollbar {
+    display: none;
+}
+
+/* Dashboard (docked) drawer: plain glass strip */
+.dashboardDocument .mainDrawer {
+    background: var(--frost-glass-bg-thick) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur-thick);
+    backdrop-filter: var(--frost-glass-blur-thick);
+    border-right: none;
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Scrim: light, so the sidebar reads as floating over the content */
+.tmla-mask {
+    background-color: rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Rows */
+.mainDrawer .mainDrawer-scrollContainer .navMenuOption {
+    display: flex;
+    align-items: center;
+    margin: 0.1em 0 !important;
+    padding: 0.5em 0.65em !important;
+    border-radius: 13px !important;
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+    letter-spacing: -0.006em;
+    transition: background-color 160ms ease, color 160ms ease, transform var(--frost-press);
+}
+
+.mainDrawer .mainDrawer-scrollContainer .navMenuOption:hover {
+    background: rgba(255, 255, 255, 0.10) !important;
+}
+
+.mainDrawer .mainDrawer-scrollContainer .navMenuOption:active {
+    transform: scale(0.97);
+}
+
+/* Icon badges: a small grey disc behind each glyph */
+.mainDrawer .navMenuOptionIcon {
+    flex: none;
+    width: 1.75em;
+    height: 1.75em;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.75em 0 0 !important;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1.05em;
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 20;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+[dir="rtl"] .mainDrawer .navMenuOptionIcon {
+    margin: 0 0 0 0.75em !important;
+}
+
+.mainDrawer .navMenuOptionIcon::before {
+    font-size: 1.05em;
+}
+
+/* Selected: the soft white pill */
+.mainDrawer .mainDrawer-scrollContainer .navMenuOption.navMenuOption-selected {
+    background: rgba(255, 255, 255, 0.88) !important;
+    color: #000000 !important;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.mainDrawer .navMenuOption-selected .navMenuOptionIcon {
+    background: rgba(0, 0, 0, 0.82);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+/* Remote / keyboard focus: solid white, a little larger */
+.mainDrawer .mainDrawer-scrollContainer .navMenuOption:focus-visible,
+.layout-tv .mainDrawer .mainDrawer-scrollContainer .navMenuOption:focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+    outline: none;
+    transform: scale(1.03);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+.mainDrawer .navMenuOption:focus-visible .navMenuOptionIcon,
+.layout-tv .mainDrawer .navMenuOption:focus .navMenuOptionIcon {
+    background: rgba(0, 0, 0, 0.82);
+    color: #ffffff;
+}
+
+/* Section labels ("Media", "Administration", "User") */
+.mainDrawer .sidebarHeader {
+    margin: 1.1em 0.7em 0.35em !important;
+    padding: 0 !important;
+    font-size: 0.82em;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.5);
+    border: none !important;
+}
+
+.mainDrawer .navMenuDivider {
+    background: rgba(255, 255, 255, 0.10);
+    height: 1px;
+    margin: 0.6em 0.7em;
+    border: none !important;
+}
+
+.mainDrawer .navMenuOptionText,
+.mainDrawer .sectionName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------- */
+/* 10.6 Rows                                          */
+/* ------------------------------------------------- */
+/* Room above and below each shelf so a lifted poster isn't clipped by the
+   horizontal scroller. Only padding is added; no negative margins, so the
+   section title above stays clickable. */
+
+.emby-scroller {
+    padding-top: 0.9em;
+    padding-bottom: 1.4em;
+}
+
+.layout-mobile .emby-scroller {
+    /* top stays 0.9em: ElegantFin pulls mobile titles down by 0.75em */
+    padding-bottom: 0.6em;
+}
+
+.verticalSection {
+    margin-bottom: 0.4em;
+}
+
+/* Scroll arrows: glass discs */
+.emby-scrollbuttons-button {
+    border-radius: 50% !important;
+    background: var(--frost-glass-bg) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    box-shadow: var(--frost-glass-edge);
+    color: #fff !important;
+    margin: 0 0.2em;
+    transition: transform var(--frost-press), background-color 150ms ease;
+}
+
+.emby-scrollbuttons-button:hover:not(:disabled) {
+    background: var(--frost-fill-strong) !important;
+}
+
+.emby-scrollbuttons-button:active {
+    transform: scale(0.92);
+}
+
+.emby-scrollbuttons-button:disabled {
+    opacity: 0.35;
+}
+
+/* ------------------------------------------------- */
+/* 10.7 Cards: the focus lift                         */
+/* ------------------------------------------------- */
+
+.cardScalable,
+.visualCardBox {
+    border: none !important;
+    border-radius: var(--frost-radius-card) !important;
+    background: var(--frost-canvas-raised) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+.cardScalable {
+    transition: transform var(--frost-spring-slow) var(--frost-spring),
+                box-shadow var(--frost-spring-slow) var(--frost-spring),
+                filter var(--frost-spring-fast) var(--frost-spring) !important;
+}
+
+.visualCardBox .cardScalable {
+    border-radius: var(--frost-radius-card) var(--frost-radius-card) 0 0 !important;
+    box-shadow: none !important;
+}
+
+.cardPadder,
+.cardBox:not(.visualCardBox) .cardPadder {
+    background-color: var(--frost-canvas-raised);
+}
+
+/* Focus sheen. AMOLED: no white over artwork, so this is off by default.
+   Set --frost-sheen to e.g. 0.12 for a faint highlight. */
+:root { --frost-sheen: 0; }
+
+.cardScalable::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(155deg,
+            rgba(255, 255, 255, var(--frost-sheen)) 0%,
+            transparent 50%);
+    opacity: 0;
+    transition: opacity var(--frost-spring-fast) var(--frost-spring);
+    z-index: 1; /* above artwork, below the overlay play button (z-index 2) */
+}
+
+/* No zoom inside the frame (base theme does this); the frame lifts instead */
+.card-hoverable:hover .cardImageContainer,
+.card .cardImageContainer {
+    transform: none !important;
+}
+
+/* The lift. Desktop: hover with a real pointer, or keyboard focus.
+   TV: remote focus. Mobile: press feedback only. */
+@media (hover: hover) and (pointer: fine) {
+    .layout-desktop .card:hover .cardScalable {
+        transform: scale(var(--frost-focus-scale)) !important;
+        box-shadow: var(--frost-lift-shadow) !important;
+        filter: brightness(1.06);
+        z-index: 2;
+    }
+
+    .layout-desktop .card:hover .cardScalable::after {
+        opacity: 1;
+    }
+}
+
+.card:focus-visible .cardScalable,
+.layout-tv .card:focus .cardScalable,
+.card.show-focus:focus .cardScalable {
+    transform: scale(var(--frost-focus-scale)) !important;
+    box-shadow: var(--frost-lift-shadow) !important;
+    filter: brightness(1.06);
+    z-index: 2;
+}
+
+.card:focus-visible .cardScalable::after,
+.layout-tv .card:focus .cardScalable::after,
+.card.show-focus:focus .cardScalable::after {
+    opacity: 1;
+}
+
+/* Cards with a footer lift as one piece */
+@media (hover: hover) and (pointer: fine) {
+    .layout-desktop .card:hover .visualCardBox {
+        transform: scale(var(--frost-focus-scale));
+        box-shadow: var(--frost-lift-shadow) !important;
+    }
+
+    .layout-desktop .card:hover .visualCardBox .cardScalable {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+.visualCardBox {
+    transition: transform var(--frost-spring-slow) var(--frost-spring),
+                box-shadow var(--frost-spring-slow) var(--frost-spring) !important;
+}
+
+.layout-tv .card:focus .visualCardBox,
+.card:focus-visible .visualCardBox {
+    transform: scale(var(--frost-focus-scale));
+    box-shadow: var(--frost-lift-shadow) !important;
+}
+
+.layout-tv .card:focus .visualCardBox .cardScalable,
+.card:focus-visible .visualCardBox .cardScalable {
+    transform: none !important;
+}
+
+/* Base theme moves the whole card on focus; keep that off so only the frame lifts */
+.card.show-animation:focus > .cardBox,
+.card.show-focus:focus > .cardBox {
+    transform: none !important;
+}
+
+/* Press: instant, on pointer-down */
+.card .cardScalable:active,
+.card-hoverable .cardScalable:active {
+    transition: transform var(--frost-press) !important;
+    transform: scale(0.97) !important;
+}
+
+/* Card labels: secondary at rest, white when the card is focused */
+.cardText {
+    color: rgba(255, 255, 255, 0.86);
+    font-weight: 500;
+    letter-spacing: -0.003em;
+    transition: color 200ms ease, transform var(--frost-spring-slow) var(--frost-spring);
+}
+
+.cardText-secondary {
+    color: var(--frost-label-secondary);
+    font-weight: 400;
+}
+
+.card:hover .cardText,
+.card:focus-within .cardText {
+    color: #ffffff !important;
+    text-shadow: none;
+}
+
+.card:hover .cardText-secondary,
+.card:focus-within .cardText-secondary {
+    color: rgba(255, 255, 255, 0.72) !important;
+}
+
+/* Labels sit above the lifted card's shadow. Without this the 56px lift
+   shadow (z-index 2) is painted over the title below the poster and the
+   label turns near-black on hover. 10.11 has bare .cardText children of
+   .cardBox; older versions wrap them in .cardFooter. */
+.cardBox > .cardFooter,
+.cardBox > .cardText {
+    position: relative;
+    z-index: 3;
+}
+
+/* Labels slide down with the lifted poster so they don't get covered */
+.layout-tv .card:focus .cardBox:not(.visualCardBox) .cardFooter,
+.card:focus-visible .cardBox:not(.visualCardBox) .cardFooter {
+    transform: translateY(0.45em);
+}
+
+.cardFooter {
+    transition: transform var(--frost-spring-slow) var(--frost-spring);
+}
+
+.visualCardBox .cardFooter {
+    background: transparent;
+    padding-bottom: 0.5em;
+}
+
+/* People: circular, like cast rows */
+#castCollapsible .cardScalable,
+#guestCastContent .cardScalable,
+.personCard .cardScalable {
+    border-radius: 50% !important;
+}
+
+#castCollapsible .cardScalable::after,
+#guestCastContent .cardScalable::after,
+.personCard .cardScalable::after {
+    border-radius: 50%;
+}
+
+/* Hover overlay: no frosted wash over the artwork, just the buttons */
+.cardOverlayContainer {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.3), transparent 35%) !important;
+    border-radius: inherit;
+}
+
+.cardOverlayContainer:has(> button:hover) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.cardOverlayContainer > .cardOverlayFab-primary,
+.listItemImageButton {
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: transform var(--frost-press), background-color 150ms ease;
+}
+
+.cardOverlayContainer > .cardOverlayFab-primary:hover,
+.listItemImageButton:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+.cardOverlayContainer > .cardOverlayFab-primary:active,
+.listItemImageButton:active {
+    transform: scale(0.92);
+}
+
+.cardOverlayButton-br button,
+.layout-desktop .cardOverlayButton-br button {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.cardImageIcon,
+.cardPadder .cardImageIcon {
+    color: rgba(255, 255, 255, 0.22);
+}
+
+.cardImageContainer > .cardDefaultText::before {
+    color: rgba(255, 255, 255, 0.22);
+}
+
+/* Library tiles on home: label inside, bottom-left, like app tiles */
+.layout-desktop .homeSectionsContainer .card[data-type="CollectionFolder"] .cardText,
+.layout-desktop .homeSectionsContainer .card[data-type="UserView"] .cardText {
+    font-weight: 600;
+}
+
+/* ------------------------------------------------- */
+/* 10.8 Indicators                                    */
+/* ------------------------------------------------- */
+
+.countIndicator,
+.fullSyncIndicator,
+.mediaSourceIndicator {
+    background: rgba(0, 0, 0, 0.62) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16) !important;
+    font-weight: 600;
+}
+
+.playedIndicator {
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.itemProgressBar {
+    height: 4px !important;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.24) !important;
+    margin: 0 0.55em 0.55em;
+}
+
+.itemProgressBarForeground {
+    background: #ffffff !important;
+    border-radius: 4px;
+}
+
+.mdl-spinner__layer-1,
+.mdl-spinner__layer-2,
+.mdl-spinner__layer-3,
+.mdl-spinner__layer-4 {
+    border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.mediaInfoOfficialRating {
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.starIcon {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ------------------------------------------------- */
+/* 10.9 Featured hero                                 */
+/* ------------------------------------------------- */
+/* Editor's Choice plugin: full-bleed artwork, logo bottom-left, a white
+   Play capsule. Same plugin support as the Glass theme. */
+
+.homeSectionsContainer.editorsChoiceAdded,
+.editorsChoiceContainer {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin-top: calc(-1 * var(--appBarHeight)) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+.editorsChoiceItemBanner {
+    height: 82vh !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: var(--frost-canvas) !important;
+    background-position: center 20% !important;
+    background-size: cover !important;
+}
+
+.layout-mobile .editorsChoiceItemBanner {
+    height: 62vh !important;
+}
+
+.editorsChoiceItemBanner > div {
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 45%, transparent 70%),
+        linear-gradient(180deg,
+            rgba(0, 0, 0, 0.45) 0%,
+            transparent 22%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.55) 75%,
+            #000000 100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: flex-start !important;
+    padding: 0 var(--sidePadding) 7vh !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: none !important;
+}
+
+.editorsChoiceItemLogo {
+    max-height: 22vh !important;
+    max-width: min(38vw, 32em) !important;
+    width: auto !important;
+    margin-bottom: 2.2vh !important;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.6));
+}
+
+.editorsChoiceItemOverview {
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 1.05rem !important;
+    line-height: 1.5 !important;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+    max-width: min(38em, 42vw) !important;
+    margin-bottom: 1.6em !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.layout-mobile .editorsChoiceItemOverview {
+    max-width: 92vw !important;
+}
+
+.editorsChoiceItemButton {
+    position: static !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.4em;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.005em;
+    border-radius: var(--frost-radius-pill) !important;
+    padding: 0.8em 2.2em !important;
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    transition: transform var(--frost-spring-fast) var(--frost-spring), box-shadow var(--frost-spring-fast) var(--frost-spring);
+}
+
+.editorsChoiceItemButton:hover,
+.editorsChoiceItemButton:focus-visible {
+    transform: scale(1.05);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.editorsChoiceItemButton:active {
+    transition: transform var(--frost-press);
+    transform: scale(0.97);
+}
+
+.editorsChoiceScrollButtonsContainer,
+.editorsChoiceItemRating {
+    display: none !important;
+}
+
+/* Media Bar plugin: same treatment, lighter touch */
+.backdrop-overlay {
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 65%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 25%, transparent 55%, #000000) !important;
+}
+
+.plot {
+    color: rgba(255, 255, 255, 0.86);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+}
+
+.play-button,
+.detail-button,
+.favorite-button {
+    border-radius: var(--frost-radius-pill) !important;
+    transition: transform var(--frost-spring-fast) var(--frost-spring), background-color 150ms ease;
+}
+
+.play-button {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+.detail-button,
+.favorite-button {
+    background: var(--frost-glass-bg) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    box-shadow: var(--frost-glass-edge);
+    color: #ffffff !important;
+}
+
+.play-button:hover,
+.detail-button:hover,
+.favorite-button:hover {
+    transform: scale(1.05);
+}
+
+.detail-button:hover,
+.favorite-button:hover {
+    background: var(--frost-fill-strong) !important;
+    color: #ffffff !important;
+}
+
+/* ------------------------------------------------- */
+/* 10.10 Detail page                                  */
+/* ------------------------------------------------- */
+/* Artwork fills the top and melts into black; title block and actions sit
+   bottom-left over it (desktop and TV keep ElegantFin's geometry). */
+
+.detailPagePrimaryContainer,
+.detailPageContent,
+.detailRibbon,
+.layout-desktop .detailPageSecondaryContainer {
+    background: transparent !important;
+}
+
+.itemBackdrop::after {
+    background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6) 80%, #000000 100%) !important;
+}
+
+.layout-desktop .detailPageWrapperContainer {
+    background: linear-gradient(180deg, transparent, 14vh, rgba(0, 0, 0, 0.88) 40vh, #000000 60vh) !important;
+}
+
+.layout-tv .detailPageWrapperContainer {
+    background: linear-gradient(0deg, #000000 65%, rgba(0, 0, 0, 0.75) 85%, transparent) !important;
+}
+
+/* Title logo: never cropped. The dark wrapper gradient used to paint over
+   its lower half, so lift it above and fit the whole image in its box. */
+.detailLogo {
+    z-index: 3 !important;
+    pointer-events: none;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    overflow: visible !important;
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
+}
+.layout-desktop .detailLogo {
+    min-height: 14vh;
+    height: 25vh !important;
+    background-position: center bottom !important;
+}
+
+/* Metadata row: quiet, separated by space rather than boxes */
+.itemMiscInfo,
+.itemMiscInfo-primary {
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 500;
+}
+
+.mediaInfoItem {
+    font-weight: 500;
+}
+
+.itemMiscInfo a,
+.parentName a,
+.textActionButton,
+.button-link {
+    color: rgba(255, 255, 255, 0.78) !important;
+    text-decoration: none !important;
+}
+
+.itemMiscInfo a:hover,
+.textActionButton:hover,
+.button-link:hover {
+    color: #ffffff !important;
+}
+
+/* Genres / studios / director block: a glass panel, not a blue box */
+.itemDetailsGroup {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: none !important;
+    box-shadow: var(--frost-glass-edge) !important;
+    border-radius: var(--frost-radius-panel) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+}
+
+.itemDetailsGroup .detailsGroupItem .label {
+    color: var(--frost-label-secondary);
+}
+
+.itemDetailsGroup .button-link,
+.itemDetailsGroup .detailsGroupItem,
+.itemDetailsGroup a {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Primary action: white capsule (ElegantFin already renders the label from
+   the button's localized title, so "Play"/"Resume" stays translated) */
+.btnPlay.detailButton {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: var(--frost-radius-pill) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: -0.005em !important;
+    transition: transform var(--frost-spring-fast) var(--frost-spring), box-shadow var(--frost-spring-fast) var(--frost-spring) !important;
+}
+
+.btnPlay.detailButton:hover,
+.btnPlay.detailButton:focus-visible,
+.layout-tv .btnPlay.detailButton:focus {
+    background: #ffffff !important;
+    transform: scale(1.05);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Secondary actions: round glass buttons */
+.detailButton:not(.btnPlay) {
+    color: #ffffff !important;
+    background: var(--frost-glass-bg) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    border: none !important;
+    box-shadow: var(--frost-glass-edge) !important;
+    transition: transform var(--frost-spring-fast) var(--frost-spring), background-color 150ms ease, color 150ms ease !important;
+}
+
+.layout-desktop .detailButton:not(.btnPlay):hover {
+    background: var(--frost-fill-strong) !important;
+    color: #ffffff !important;
+    transform: scale(1.08);
+}
+
+/* Focused secondary action turns white */
+.detailButton:not(.btnPlay):focus-visible,
+.layout-tv .detailButton:not(.btnPlay):focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+    transform: scale(1.08);
+}
+
+.detailButton:active,
+.btnPlay.detailButton:active {
+    transition: transform var(--frost-press) !important;
+    transform: scale(0.94) !important;
+}
+
+/* Favorite keeps its meaning in color */
+.detailButton[data-isfavorite="true"] .material-icons,
+.emby-button[data-isfavorite="true"] .material-icons.favorite,
+.btnUserItemRating[data-isfavorite="true"] .material-icons {
+    color: var(--frost-red) !important;
+}
+
+.detailButton:not(.btnPlay):focus-visible[data-isfavorite="true"] .material-icons,
+.layout-tv .detailButton:not(.btnPlay):focus[data-isfavorite="true"] .material-icons {
+    color: var(--frost-red) !important;
+}
+
+/* Seasons / episodes */
+.childrenItemsContainer .listItem,
+#childrenContent .listItem {
+    border-radius: var(--frost-radius-card);
+}
+
+.listItemImage,
+.listItemImage-large {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* ------------------------------------------------- */
+/* 10.11 Controls: buttons, fields, toggles            */
+/* ------------------------------------------------- */
+
+.raised,
+.fab,
+.emby-button.raised {
+    background: var(--frost-fill-strong);
+    color: #ffffff;
+    border: none !important;
+    border-radius: var(--frost-radius-control);
+    box-shadow: none;
+    font-weight: 500;
+    transition: transform var(--frost-press), background-color 150ms ease, filter 150ms ease;
+}
+
+.raised:hover,
+.fab:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.raised:active,
+.fab:active,
+.emby-button:active {
+    filter: none !important;
+    transform: scale(0.97);
+}
+
+.button-submit,
+.raised.button-submit,
+.emby-button.button-submit {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+.button-submit:hover {
+    background: rgba(255, 255, 255, 0.88) !important;
+}
+
+.button-delete,
+.raised.button-delete {
+    background: var(--frost-red) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.raised:focus-visible,
+.fab:focus-visible,
+.emby-button:focus-visible,
+.paper-icon-button-light:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 2px;
+}
+
+.emby-input,
+.emby-textarea,
+.emby-select-withcolor,
+.emby-select {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: var(--frost-radius-control) !important;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.emby-input:focus,
+.emby-textarea:focus,
+.emby-select:focus,
+.emby-select-withcolor:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14) !important;
+    outline: none;
+}
+
+.emby-input::placeholder,
+.emby-textarea::placeholder {
+    color: var(--frost-label-tertiary);
+}
+
+.inputLabel,
+.selectLabel,
+.textareaLabel {
+    color: var(--frost-label-secondary);
+}
+
+.inputLabelFocused,
+.selectLabelFocused,
+.textareaLabelFocused {
+    color: #ffffff !important;
+}
+
+.emby-select-withcolor > option,
+.emby-select > option {
+    background: #1c1c1e;
+    color: #ffffff;
+}
+
+/* Checkboxes: white when checked, black tick */
+.emby-checkbox:checked + span + .checkboxOutline {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+.emby-checkbox:checked + span + .checkboxOutline .checkboxIcon-checked {
+    color: #000000 !important;
+}
+
+.checkboxOutline {
+    border-radius: 6px !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Toggles: iOS-style track */
+.mdl-switch__track {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--frost-radius-pill) !important;
+}
+
+.mdl-switch.is-checked .mdl-switch__track {
+    background: var(--frost-green) !important;
+}
+
+.mdl-switch__thumb,
+.mdl-switch.is-checked .mdl-switch__thumb {
+    background: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Collapsible sections */
+.emby-collapsible-button {
+    border-radius: var(--frost-radius-control);
+}
+
+/* ------------------------------------------------- */
+/* 10.12 Menus, dialogs, toasts                       */
+/* ------------------------------------------------- */
+/* Floating glass panels. Modal tasks get a dimming scrim behind them. */
+
+.dialog,
+.actionSheet,
+.upNextContainer,
+.toast {
+    background: var(--frost-glass-bg-thick) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur-thick);
+    backdrop-filter: var(--frost-glass-blur-thick);
+    border: none !important;
+    box-shadow: var(--frost-glass-edge), 0 30px 80px rgba(0, 0, 0, 0.55) !important;
+    color: #ffffff;
+}
+
+.dialog:not(.dialog-fullscreen) {
+    border-radius: var(--frost-radius-panel) !important;
+}
+
+.dialog.dialog-fullscreen,
+.dialog.dialog-fullscreen-lowres {
+    border-radius: 0 !important;
+}
+
+.toast {
+    border-radius: 18px !important;
+    padding: 0.8em 1.4em !important;
+    font-weight: 500;
+}
+
+.dialogBackdrop {
+    background: #000000 !important;
+}
+
+.dialogBackdropOpened {
+    opacity: 0.5 !important;
+}
+
+.formDialogHeader,
+.formDialogFooter {
+    background: transparent !important;
+    border-color: var(--frost-separator) !important;
+}
+
+.formDialogHeader {
+    border-bottom: 1px solid var(--frost-separator) !important;
+}
+
+/* Action sheets anchor to their trigger and grow out of it */
+.actionSheet {
+    transform-origin: top left;
+}
+
+.actionSheetContent {
+    padding: 0.5em !important;
+}
+
+.actionSheetMenuItem {
+    border-radius: 12px !important;
+    transition: background-color 120ms ease, transform var(--frost-press);
+}
+
+.actionSheetMenuItem:hover {
+    background: var(--frost-fill) !important;
+}
+
+.actionSheet .actionSheetMenuItem:focus-visible,
+.layout-tv .actionSheet .actionSheetMenuItem:focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+    outline: none;
+}
+
+.layout-tv .actionSheetMenuItem:focus .listItemBodyText,
+.actionSheetMenuItem:focus-visible .listItemBodyText,
+.layout-tv .actionSheetMenuItem:focus .actionsheetMenuItemIcon,
+.actionSheetMenuItem:focus-visible .actionsheetMenuItemIcon {
+    color: #000000 !important;
+}
+
+.actionSheetMenuItem:active {
+    transform: scale(0.98);
+}
+
+.actionSheetMenuItem:has(.listItemIcon.check) {
+    background: var(--frost-fill-strong) !important;
+}
+
+.actionsheetDivider {
+    background: var(--frost-separator);
+    height: 1px;
+}
+
+/* Up Next */
+.upNextContainer {
+    border-radius: var(--frost-radius-panel) !important;
+}
+
+.upNextContainer .btnStartNow {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+}
+
+/* Skip intro: white capsule, bottom right (bottom left on TV) */
+.skip-button {
+    background: #ffffff;
+    color: #000000;
+    border-radius: var(--frost-radius-pill) !important;
+    font-weight: 600;
+    padding: 0.8em 1.8em;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    transition: transform var(--frost-spring-fast) var(--frost-spring);
+}
+
+.skip-button:hover,
+.skip-button:focus-visible,
+.layout-tv .skip-button:focus {
+    transform: scale(1.05);
+}
+
+/* ------------------------------------------------- */
+/* 10.13 Player (OSD)                                 */
+/* ------------------------------------------------- */
+/* Player: a glass control bar floating above the bottom edge, a thin
+   white scrubber that thickens when you grab it. */
+
+.videoOsdBottom {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3) 55%, transparent) !important;
+}
+
+.videoOsdBottom .osdControls {
+    margin: 0 var(--sidePadding) 1.2em;
+    padding: 0.9em 1.3em 0.7em;
+    border-radius: var(--frost-radius-panel);
+    background: var(--frost-glass-bg);
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    box-shadow: var(--frost-glass-edge), var(--frost-glass-shadow);
+}
+
+.layout-mobile .videoOsdBottom .osdControls {
+    margin: 0 0.6em 0.8em;
+    padding: 0.6em 0.8em 0.4em;
+}
+
+.osdTitle,
+.osdTextContainer .osdTitle {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.osdMediaInfo,
+.osdSecondaryMediaInfo,
+.osdTimeText,
+.osdPositionText,
+.osdDurationText {
+    color: var(--frost-label-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.mdl-slider-background-flex {
+    border-radius: var(--frost-radius-pill);
+    height: 0.32em;
+    margin-top: -0.16em;
+    overflow: hidden;
+    transition: height var(--frost-spring-fast) var(--frost-spring), margin-top var(--frost-spring-fast) var(--frost-spring);
+}
+
+.sliderContainer:hover .mdl-slider-background-flex {
+    height: 0.5em;
+    margin-top: -0.25em;
+}
+
+.sliderContainer:active .mdl-slider-background-flex {
+    height: 0.7em;
+    margin-top: -0.35em;
+}
+
+.mdl-slider::-webkit-slider-thumb {
+    width: 0.5em !important;
+    height: 0.5em !important;
+    border-radius: 50% !important;
+    background: #ffffff;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.sliderContainer:hover .mdl-slider::-webkit-slider-thumb,
+.sliderContainer:active .mdl-slider::-webkit-slider-thumb,
+.mdl-slider.show-focus:focus::-webkit-slider-thumb,
+.mdl-slider:focus-visible::-webkit-slider-thumb {
+    opacity: 1;
+    width: 0.9em !important;
+    height: 0.9em !important;
+    border-radius: 50% !important;
+    transform: none;
+}
+
+.mdl-slider::-moz-range-thumb {
+    background: #ffffff;
+    border: none;
+    width: 0.9em;
+    height: 0.9em;
+    border-radius: 50%;
+}
+
+.sliderBubble {
+    background: var(--frost-glass-bg-thick) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    border-radius: 12px !important;
+    box-shadow: var(--frost-glass-edge), var(--frost-glass-shadow);
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.chapterThumbContainer {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.videoOsdBottom .paper-icon-button-light,
+.osdHeader .headerButton {
+    border-radius: 50%;
+    transition: background-color 150ms ease, transform var(--frost-press);
+}
+
+.videoOsdBottom .paper-icon-button-light:hover:not(:disabled) {
+    background: var(--frost-fill-strong);
+}
+
+.videoOsdBottom .paper-icon-button-light:active {
+    transform: scale(0.9);
+}
+
+.layout-tv .videoOsdBottom .paper-icon-button-light:focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Now-playing bar (music / background playback) */
+.nowPlayingBar {
+    background: var(--frost-glass-bg-thick) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur-thick);
+    backdrop-filter: var(--frost-glass-blur-thick);
+    border-top: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 -10px 40px rgba(0, 0, 0, 0.45);
+}
+
+.nowPlayingBarImage,
+.nowPlayingImage {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ------------------------------------------------- */
+/* 10.14 Login                                        */
+/* ------------------------------------------------- */
+
+#loginPage .manualLoginForm,
+#loginPage .visualLoginForm {
+    background: var(--frost-glass-bg-thick);
+    -webkit-backdrop-filter: var(--frost-glass-blur-thick);
+    backdrop-filter: var(--frost-glass-blur-thick);
+    box-shadow: var(--frost-glass-edge), 0 30px 80px rgba(0, 0, 0, 0.5);
+    border-radius: var(--frost-radius-panel);
+    padding: 1.6em 1.8em !important;
+}
+
+#loginPage .visualLoginForm .card .cardScalable {
+    border-radius: 50% !important;
+}
+
+#loginPage .visualLoginForm .card .cardScalable::after {
+    border-radius: 50%;
+}
+
+#loginPage h1 {
+    font-weight: 700;
+    letter-spacing: -0.022em;
+}
+
+/* ------------------------------------------------- */
+/* 10.15 Lists                                        */
+/* ------------------------------------------------- */
+
+.listItem {
+    border-radius: var(--frost-radius-control);
+    transition: background-color 120ms ease;
+}
+
+.layout-desktop .listItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.listItem:focus-visible,
+.layout-tv .listItem:focus {
+    background: var(--frost-fill-strong) !important;
+}
+
+.paperList {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: none !important;
+    border-radius: var(--frost-radius-panel) !important;
+}
+
+/* Multi-select bar */
+.selectionCommandsPanel {
+    background: var(--frost-glass-bg-thick) !important;
+    -webkit-backdrop-filter: var(--frost-glass-blur-thick);
+    backdrop-filter: var(--frost-glass-blur-thick);
+}
+
+/* ------------------------------------------------- */
+/* 10.16 Glass switch & TV performance                */
+/* ------------------------------------------------- */
+/* Android TV / webOS / Tizen boxes often can't afford backdrop blur.
+   On the TV layout the glass becomes a near-solid tint (same look, no blur). */
+
+.layout-tv .sectionTabs .emby-tabs-slider,
+.layout-tv .emby-scrollbuttons-button,
+.layout-tv .detailButton:not(.btnPlay),
+.layout-tv .itemDetailsGroup,
+.layout-tv .detail-button,
+.layout-tv .favorite-button {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+.layout-tv .sectionTabs .emby-tabs-slider,
+.layout-tv .detailButton:not(.btnPlay),
+.layout-tv .emby-scrollbuttons-button {
+    background: rgba(44, 44, 48, 0.92) !important;
+}
+
+/* --frost-glass: 0 → same treatment everywhere */
+@container style(--frost-glass: 0) {
+    * {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+}
+
+/* ------------------------------------------------- */
+/* 10.17 Home: Up Next row, no "My Media"             */
+/* ------------------------------------------------- */
+/* Selectors come from jellyfin-web 10.11 src/components/homesections.
+   Sections have no stable class names (they're numbered by the user's
+   order), so each one is found by what it contains. */
+
+/* "My Media" library tiles/buttons. The header tabs and the sidebar already
+   link to every library, so the row only repeats them.
+   Set --frost-home-my-media: block in :root to bring it back. */
+.homeSectionsContainer > :has(.card[data-type="CollectionFolder"]),
+.homeSectionsContainer > :has(.card[data-type="UserView"]),
+.homeSectionsContainer > :has(.homeLibraryButton) {
+    display: var(--frost-home-my-media, none) !important;
+}
+
+/* Continue Watching and Next Up: "Up Next". Big landscape artwork that
+   melts into black at the bottom, the title written on the art, a white
+   play button and a thin progress line.
+   Continue Watching (video) = bare h2 title + data-monitor="videoplayback…".
+   Next Up = same monitor, title inside .sectionTitleContainer. Audio and
+   book resume rows use other monitors and keep the normal look. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .overflowBackdropCard {
+    --cardCount: 3.3;
+}
+
+.layout-tv .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .overflowBackdropCard {
+    --cardCount: 3.15;
+}
+
+.layout-mobile .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .overflowBackdropCard {
+    --cardCount: 1.2;
+}
+
+@media (orientation: landscape) {
+    .layout-mobile .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .overflowBackdropCard {
+        --cardCount: 2.2;
+    }
+}
+
+/* The fade: drawn by the inner footer that already holds the progress bar,
+   so it sits over the artwork and under the buttons. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .innerCardFooter {
+    height: 100% !important;
+    padding: 0 1.1em 0.95em !important;
+    background: linear-gradient(0deg,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(0, 0, 0, 0.62) 24%,
+            rgba(0, 0, 0, 0.2) 50%,
+            transparent 68%) !important;
+    text-shadow: none;
+    align-content: end;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .itemProgressBar {
+    margin: 0 !important;
+    height: 3px !important;
+}
+
+/* Title and year move onto the artwork, bottom-left. The footer is laid
+   over the frame exactly, so it can lift with it. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox {
+    position: relative;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox > .cardFooter {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 4.4em 1.75em 1.1em !important;
+    margin: 0 !important;
+    background: none !important;
+    pointer-events: none;
+    transform: none !important;
+    transition: transform var(--frost-spring-slow) var(--frost-spring) !important;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardFooter .cardText {
+    text-align: left !important;
+    padding: 0 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardFooter .cardText-first {
+    font-size: 1.08em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardFooter .cardText-secondary {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 0.85em;
+}
+
+/* Jellyfin 10.11 drops the .cardFooter wrapper: the title and year are
+   bare .cardText children of .cardBox. Each line becomes a box the size of
+   the frame with its text pinned to the bottom, so it can scale around the
+   same centre as the artwork when the card lifts. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox:has(> .cardText) {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox > .cardText {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+    margin: 0 !important;
+    padding: 0 4.6em 1.7em 1.15em !important;
+    text-align: left !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    transform: none !important;
+    transition: transform var(--frost-spring-slow) var(--frost-spring) !important;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox > .cardText > bdi {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox > .cardText-first {
+    padding-bottom: 2.85em !important;
+    font-size: 1.12em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardBox > .cardText-secondary {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 0.85em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .layout-desktop .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:hover .cardBox > .cardText {
+        transform: scale(var(--frost-focus-scale)) !important;
+    }
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:focus-visible .cardBox > .cardText,
+.layout-tv .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:focus .cardBox > .cardText {
+    transform: scale(var(--frost-focus-scale)) !important;
+}
+
+/* The play button carries .cardOverlayButton-hover, which Jellyfin keeps
+   at opacity 0 until hover. Here it's always visible. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer > .cardOverlayFab-primary {
+    opacity: 1 !important;
+}
+
+/* Lift the label with the artwork (same scale, same spring) */
+@media (hover: hover) and (pointer: fine) {
+    .layout-desktop .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:hover .cardBox > .cardFooter {
+        transform: scale(var(--frost-focus-scale)) !important;
+    }
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:focus-visible .cardBox > .cardFooter,
+.layout-tv .homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:focus .cardBox > .cardFooter {
+    transform: scale(var(--frost-focus-scale)) !important;
+}
+
+/* Play button: always there (desktop builds the hover overlay; TV and phones
+   don't, there the whole card resumes). White disc, black glyph,
+   bottom-right. The ✓ ♥ ⋯ buttons still appear only on hover. */
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer {
+    opacity: 1 !important;
+    background: transparent !important;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer::after {
+    display: none !important;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer > .cardOverlayFab-primary {
+    left: auto !important;
+    top: auto !important;
+    right: 1em !important;
+    bottom: 1.55em !important;
+    width: 2.6em;
+    height: 2.6em;
+    padding: 0 !important;
+    font-size: 1rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.94) !important;
+    color: #000000 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+    z-index: 4;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer > .cardOverlayFab-primary .material-icons {
+    font-size: 1.6em;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayContainer > .cardOverlayFab-primary:hover {
+    background: #ffffff !important;
+    transform: scale(1.08);
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .cardOverlayButton-br {
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:hover .cardOverlayButton-br,
+.homeSectionsContainer > .verticalSection:has(.itemsContainer[data-monitor^="videoplayback"]) .card:focus-within .cardOverlayButton-br {
+    opacity: 1;
+}
+
+/* Ambient backdrop (needs theme.js). The hovered/focused item's artwork
+   fills the screen behind Home and melts into black. The script adds
+   html.frost-ambient-on only while Home is showing and no video plays, so
+   the AMOLED black rules above stay in force everywhere else. */
+html.frost-ambient-on :is(body, .skinBody, .mainAnimatedPages, .page, .homePage,
+        #indexPage, #indexPage .tabContent, #homeTab, #favoritesTab,
+        .homeSectionsContainer, .padded-bottom-page, .pageContainer,
+        .backgroundContainer, .backdropContainer) {
+    background-color: transparent !important;
+}
+
+.frostAmbient {
+    /* Scrolls with the page: art at the top, pure black further down */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -1; /* above html's black, below every page layer */
+    pointer-events: none;
+    display: none;
+    background: #000000;
+}
+
+html.frost-ambient-on .frostAmbient {
+    display: block;
+}
+
+.frostAmbient-img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 22%;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 700ms ease, transform 1200ms var(--frost-spring);
+}
+
+.frostAmbient-img.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Readability: dark at the left (text side) and fully black by the lower
+   third, where the rows sit */
+.frostAmbient-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(0deg, #000000 0%, rgba(0, 0, 0, 0.94) 16%, rgba(0, 0, 0, 0.5) 38%, rgba(0, 0, 0, 0.08) 64%, rgba(0, 0, 0, 0.4) 100%),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.4) 32%, rgba(0, 0, 0, 0) 58%);
+}
+
+.layout-mobile .frostAmbient {
+    height: 70vh;
+}
+
+/* Featured hero (theme.js): the featured item over its own artwork.
+   Content sits bottom-left on the darkest part of the scrim. */
+.frostHero {
+    height: clamp(360px, 58vh, 720px);
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 1.6em;
+    box-sizing: border-box;
+}
+
+.frostHero-inner {
+    max-width: min(38em, 46vw);
+    transition: opacity 180ms ease, transform 320ms var(--frost-spring);
+}
+
+.frostHero.is-changing .frostHero-inner {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.frostHero-logo {
+    display: block;
+    max-width: min(460px, 34vw);
+    max-height: 10em;
+    object-fit: contain;
+    object-position: left bottom;
+    margin-bottom: 1em;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.55));
+}
+
+.frostHero-title {
+    margin: 0 0 0.35em;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    color: #ffffff;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+}
+
+.frostHero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3em 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.05rem;
+    font-weight: 500;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+}
+
+.frostHero-meta > span + span::before {
+    content: "\00B7";
+    margin: 0 0.55em;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.frostHero-meta > .frostHero-rating {
+    padding: 0 0.4em;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    font-size: 0.8em;
+    line-height: 1.5;
+    margin-left: 0.7em;
+}
+
+.frostHero-meta > .frostHero-rating::before {
+    content: none;
+}
+
+.frostHero-overview {
+    margin: 0.75em 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1.1rem;
+    line-height: 1.45;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.frostHero-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin-top: 1.3em;
+}
+
+.frostHero-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    height: 2.9em;
+    padding: 0 1.6em 0 1.2em;
+    border: 0;
+    border-radius: var(--frost-radius-pill);
+    background: #ffffff;
+    color: #000000;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition: transform var(--frost-spring-fast) var(--frost-spring), box-shadow 200ms ease;
+}
+
+.frostHero-play .material-icons {
+    font-size: 1.55em;
+}
+
+.frostHero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.9em;
+    height: 2.9em;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--frost-glass-bg);
+    -webkit-backdrop-filter: var(--frost-glass-blur);
+    backdrop-filter: var(--frost-glass-blur);
+    box-shadow: var(--frost-glass-edge);
+    color: #ffffff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform var(--frost-spring-fast) var(--frost-spring), background-color 150ms ease, color 150ms ease;
+}
+
+.frostHero-btn .material-icons {
+    font-size: 1.3em;
+}
+
+.frostHero-btn[aria-pressed="true"] .material-icons {
+    color: var(--frost-red);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .frostHero-play:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .frostHero-btn:hover {
+        background: #ffffff;
+        color: #000000;
+        transform: scale(1.06);
+    }
+}
+
+.frostHero-play:focus-visible,
+.layout-tv .frostHero-play:focus {
+    outline: none;
+    transform: scale(1.08);
+}
+
+.frostHero-btn:focus-visible,
+.layout-tv .frostHero-btn:focus {
+    outline: none;
+    background: #ffffff;
+    color: #000000;
+    transform: scale(1.1);
+}
+
+.frostHero-play:active,
+.frostHero-btn:active {
+    transition-duration: 90ms;
+    transform: scale(0.95);
+}
+
+.frostHero-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    margin-top: 1em;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.85rem;
+}
+
+.frostHero-bar {
+    width: 9em;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+}
+
+.frostHero-barFill {
+    height: 100%;
+    background: #ffffff;
+    border-radius: inherit;
+}
+
+.layout-mobile .frostHero {
+    height: 56vh;
+}
+
+.layout-mobile .frostHero-inner {
+    max-width: 100%;
+}
+
+.layout-mobile .frostHero-logo {
+    max-width: 62vw;
+    max-height: 6em;
+}
+
+.layout-mobile .frostHero-overview {
+    -webkit-line-clamp: 2;
+    font-size: 0.9rem;
+}
+
+/* Title logo on Continue Watching tiles (theme.js). The plain-text title
+   steps aside; the year stays under the logo. */
+.frostTileLogo {
+    position: absolute;
+    left: 1.1em;
+    bottom: 2.7em;
+    max-width: 40%;
+    max-height: 30%;
+    object-fit: contain;
+    object-position: left bottom;
+    z-index: 3;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.65));
+}
+
+.homeSectionsContainer .card.frostHasLogo .cardBox > .cardText-first,
+.homeSectionsContainer .card.frostHasLogo .cardFooter .cardText-first {
+    visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .frostAmbient-img,
+    .frostAmbient-img.is-visible {
+        transform: none;
+        transition: opacity 200ms ease;
+    }
+}
+
+/* Row headings that link somewhere ("Recently Added in Movies", "Next Up")
+   get a small capsule instead of the bare chevron.
+   Jellyfin decides where the link goes (for Movies: the library's
+   Suggestions tab), so the capsule says "More", not "All Movies".
+   Change the text with --frost-more-label: "…" in :root. */
+.homeSectionsContainer .sectionTitleTextButton {
+    display: inline-flex !important;
+    align-items: center;
+}
+
+.homeSectionsContainer .sectionTitleTextButton > .material-icons.chevron_right {
+    display: none;
+}
+
+.homeSectionsContainer .sectionTitleTextButton::after {
+    content: var(--frost-more-label, "More \203A");
+    flex: none;
+    margin-left: 0.8em;
+    padding: 0.3em 0.85em;
+    border-radius: var(--frost-radius-pill);
+    background: var(--frost-fill);
+    color: var(--frost-label-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: background-color 150ms ease, color 150ms ease, transform var(--frost-press);
+}
+
+.homeSectionsContainer .sectionTitleTextButton:hover::after,
+.homeSectionsContainer .sectionTitleTextButton:focus-visible::after {
+    background: #ffffff;
+    color: #000000;
+}
+
+.homeSectionsContainer .sectionTitleTextButton:active::after {
+    transform: scale(0.94);
+}
+
+/* ------------------------------------------------- */
+/* 10.18 Accessibility                                */
+/* ------------------------------------------------- */
+
+/* Reduced motion: no lifting or sliding; focus is shown by brightness and
+   a ring instead, with short cross-fades. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --frost-focus-scale: 1;
+    }
+
+    .cardScalable,
+    .visualCardBox,
+    .cardFooter,
+    .sectionTabs .emby-tab-button,
+    .btnPlay.detailButton,
+    .detailButton,
+    .editorsChoiceItemButton,
+    .skip-button,
+    .mdl-slider-background-flex {
+        transition: opacity 150ms ease, filter 150ms ease, background-color 150ms ease, color 150ms ease !important;
+        transform: none !important;
+    }
+
+    .card:focus-visible .cardScalable,
+    .layout-tv .card:focus .cardScalable {
+        box-shadow: 0 0 0 3px #ffffff !important;
+    }
+
+    .card:focus-visible .cardFooter,
+    .layout-tv .card:focus .cardFooter {
+        transform: none !important;
+    }
+}
+
+/* Reduced transparency: frosted surfaces become solid */
+@media (prefers-reduced-transparency: reduce) {
+    :root {
+        --frost-glass-bg: #2c2c2e;
+        --frost-glass-bg-thick: #1c1c1e;
+        --frost-sidebar-fill: linear-gradient(180deg, #3a3a3c, #232325);
+    }
+
+    .sectionTabs .emby-tabs-slider,
+    .mainDrawer,
+    .mainDrawer-scrollContainer,
+    .dialog,
+    .actionSheet,
+    .toast,
+    .upNextContainer,
+    .videoOsdBottom .osdControls,
+    .nowPlayingBar,
+    .detailButton:not(.btnPlay),
+    .emby-scrollbuttons-button,
+    .itemDetailsGroup,
+    #loginPage .manualLoginForm,
+    #loginPage .visualLoginForm {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+}
+
+/* Increased contrast: solid surfaces, defined edges, brighter secondary text */
+@media (prefers-contrast: more) {
+    :root {
+        --frost-label-secondary: rgba(235, 235, 245, 0.85);
+        --frost-glass-bg: #2c2c2e;
+        --frost-glass-bg-thick: #1c1c1e;
+        --frost-glass-edge: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+        --frost-sidebar-fill: linear-gradient(180deg, #3a3a3c, #1c1c1e);
+        --frost-sidebar-rim: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+    }
+
+    .card:focus-visible .cardScalable,
+    .layout-tv .card:focus .cardScalable {
+        box-shadow: 0 0 0 3px #ffffff, var(--frost-lift-shadow) !important;
+    }
+}
+
+/* Forced colors (Windows high contrast): let the system draw focus */
+@media (forced-colors: active) {
+    .cardScalable::after {
+        display: none;
+    }
+
+    .card:focus-visible .cardScalable {
+        outline: 3px solid CanvasText;
+    }
+}
+
+/* END OF GLASS LAYER */
+/* ================================================= */
+
+
+/* Home hero (Abyss Spotlight iframe): the white wash.
+   Jellyfin sets color-scheme: dark on the page, but the Spotlight document is
+   light-scheme. When an iframe's scheme differs from its document's, the
+   browser paints an opaque WHITE canvas behind it, which showed through the
+   banner's faded edges. Matching the iframe's scheme keeps it transparent. */
+iframe.featurediframe,
+.featurediframe,
+.tabContent iframe {
+    color-scheme: normal !important;
+    background: transparent !important;
+}
+.homePage,
+#indexPage,
+#indexPage .tabContent,
+#favoritesTab,
+#homeTab {
+    background-color: #000000 !important;
+}

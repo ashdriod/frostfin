@@ -1,0 +1,40 @@
+/* Stand-ins for the parts of jellyfin-web's own CSS that the theme builds on.
+   Not part of the theme; only here so the demo lays out like a real server. */
+body { margin: 0; min-height: 100vh; overflow-x: hidden; }
+.skinHeader { position: fixed; top: 0; left: 0; right: 0; z-index: 10; }
+.headerTop { display: flex; justify-content: space-between; align-items: center; padding: .5em 1em; }
+.headerLeft, .headerRight { display: flex; align-items: center; gap: .25em; }
+.headerButton { background: none; border: 0; color: #fff; width: 2.6em; height: 2.6em; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 1em; }
+.sectionTabs { display: flex; justify-content: center; }
+.emby-tab-button { border: 0; cursor: pointer; font: inherit; font-size: 1em; color: inherit; background: none; }
+.libraryPage { padding-top: 8.5em; }
+.layout-mobile .libraryPage { padding-top: 6.5em; }
+.padded-left { padding-left: 3.3%; } .padded-right { padding-right: 3.3%; }
+.verticalSection { margin-bottom: 1.6em; }
+.sectionTitleContainer { display: flex; align-items: center; }
+.sectionTitle { margin: 0 0 .4em; }
+.emby-scroller { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; }
+.emby-scroller::-webkit-scrollbar { display: none; }
+.itemsContainer { display: flex; flex-wrap: nowrap; }
+.card { flex: 0 0 auto; outline: none; cursor: pointer; position: relative; }
+.cardBox { position: relative; }
+.cardScalable { position: relative; overflow: hidden; }
+.cardPadder-overflowPortrait, .cardPadder-portrait { padding-bottom: 150%; }
+.cardPadder-overflowBackdrop, .cardPadder-backdrop { padding-bottom: 56.25%; }
+.cardImageContainer { position: absolute; inset: 0; background-size: cover; background-position: center; display: flex; text-decoration: none; }
+.cardText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: .1em .3em; }
+.cardText a { color: inherit; text-decoration: none; }
+.cardTextCentered { text-align: center; }
+.cardText-first { padding-top: .5em; }
+.innerCardFooter { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; }
+.itemProgressBar { position: relative; height: .25em; }
+.itemProgressBarForeground { position: absolute; left: 0; top: 0; bottom: 0; }
+.cardOverlayContainer { position: absolute; inset: 0; z-index: 2; opacity: 0; transition: opacity .2s; }
+.card:hover .cardOverlayContainer, .card:focus-within .cardOverlayContainer { opacity: 1; }
+.cardOverlayFab-primary { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 3em; height: 3em; border-radius: 50%; border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.cardOverlayButton-br { position: absolute; right: 0; bottom: 0; display: flex; }
+.cardOverlayButton { background: none; border: 0; color: #fff; padding: .5em; cursor: pointer; }
+.sectionTitleTextButton { text-decoration: none; color: inherit; display: inline-flex; align-items: center; }
+.hide { display: none !important; }
+
+/* jellyfin-web draws Material icons from the class name (rules generated in app.mjs) */

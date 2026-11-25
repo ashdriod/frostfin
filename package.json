@@ -1,0 +1,27 @@
+{
+  "name": "frostfin",
+  "version": "1.0.0",
+  "description": "A glass-inspired theme for the Jellyfin web client: featured hero, glass tab bar, focus lift and big Continue Watching tiles.",
+  "license": "GPL-2.0-only",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashdriod/frostfin.git"
+  },
+  "keywords": ["jellyfin", "jellyfin-theme", "css", "glass", "glassmorphism"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "demo": "node scripts/serve.mjs",
+    "test": "node scripts/smoke.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright": "1.65.1"
+  }
+}
