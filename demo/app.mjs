@@ -31,13 +31,13 @@ function overlay(it, resume) {
 function card(it, shape) {
   const backdrop = shape === 'overflowBackdrop';
   const resume = backdrop && it.UserData?.PlaybackPositionTicks > 0;
-  const src = backdrop ? img(it.Id, 'Thumb', it.ImageTags.Thumb || it.ImageTags.Primary, 463, 261) : img(it.Id, 'Primary', it.ImageTags.Primary, 274, 411);
-  const title = it.Type === 'Episode' ? it.SeriesName : it.Name;
-  const sub = it.Type === 'Episode' ? `S${it.ParentIndexNumber}:E${it.IndexNumber} - ${it.Name}` : it.ProductionYear;
+  const src = backdrop ? img(it.Id, 'Thumb', it.ImageTags.Thumb, 463, 261) : img(it.Id, 'Primary', it.ImageTags.Primary, 274, 411);
+  const title = it.Name;
+  const sub = it.ProductionYear;
   const progress = resume
     ? `<div class="innerCardFooter fullInnerCardFooter innerCardFooterClear"><div class="itemProgressBar"><div class="itemProgressBarForeground" style="width:${it.UserData.PlayedPercentage}%"></div></div></div>`
     : '';
-  return `<div class="card ${shape}Card card-hoverable card-withuserdata" data-index="0" data-isfolder="${it.Type === 'Series'}" data-serverid="demo" data-id="${esc(it.Id)}" data-type="${esc(it.Type)}" data-mediatype="Video" data-prefix="${esc(title[0])}" tabindex="0">
+  return `<div class="card ${shape}Card card-hoverable card-withuserdata" data-index="0" data-isfolder="false" data-serverid="demo" data-id="${esc(it.Id)}" data-type="${esc(it.Type)}" data-mediatype="Video" data-prefix="${esc(title[0])}" tabindex="0">
     <div class="cardBox cardBox-bottompadded">
       <div class="cardScalable">
         <div class="cardPadder cardPadder-${shape} lazy-hidden-children"></div>
@@ -71,10 +71,10 @@ const linkHead = (t, type) => `<div class="sectionTitleContainer sectionTitleCon
     <h2 class="sectionTitle sectionTitle-cards">${t}</h2><span class="material-icons chevron_right" aria-hidden="true"></span></a></div>`;
 
 document.getElementById('home').innerHTML = [
-  section(0, plainHead('My Media'), ['Movies', 'Shows'].map(libraryCard).join('')),
+  section(0, plainHead('My Media'), ['Movies', 'Shorts'].map(libraryCard).join('')),
   section(1, plainHead('Continue Watching'), HOME.continueWatching.map((it) => card(it, 'overflowBackdrop')).join(''), 'videoplayback,markplayed'),
   section(2, linkHead('Recently Added in Movies', 'movies'), HOME.recentMovies.map((it) => card(it, 'overflowPortrait')).join('')),
-  section(3, linkHead('Recently Added in Shows', 'tvshows'), HOME.recentShows.map((it) => card(it, 'overflowPortrait')).join('')),
+  section(3, linkHead('Recently Added in Shorts', 'tvshows'), HOME.recentShorts.map((it) => card(it, 'overflowBackdrop')).join('')),
 ].join('');
 
 // Mock of the parts of jellyfin-web's ApiClient that theme.js uses

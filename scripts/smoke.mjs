@@ -38,7 +38,7 @@ for (const layout of ['', '?tv', '?mobile']) {
     hires: document.querySelectorAll('.section1 [data-frost-hires]').length,
     fabVisible: getComputedStyle(document.querySelector('.section1 .cardOverlayFab-primary')).opacity === '1',
   }));
-  check(`[${label}] hero shows the first Continue Watching item`, r.heroTitle === 'The Glass Meridian', r.heroTitle);
+  check(`[${label}] hero shows the first Continue Watching item`, r.heroTitle === 'Sintel', r.heroTitle);
   check(`[${label}] hero has a summary`, r.overview);
   check(`[${label}] ambient backdrop is shown`, r.ambient);
   check(`[${label}] "My Media" row is hidden`, r.myMediaHidden);
@@ -49,11 +49,11 @@ for (const layout of ['', '?tv', '?mobile']) {
 
   if (!layout) {
     await page.locator('.section2 .card').nth(5).hover();
-    const followed = await page.waitForFunction(() => document.querySelector('.frostHero-logo')?.alt === 'Saltwater Kings', null, { timeout: 5000 }).then(() => true, () => false);
+    const followed = await page.waitForFunction(() => document.querySelector('.frostHero-logo')?.alt === 'Tears of Steel', null, { timeout: 5000 }).then(() => true, () => false);
     check('[desktop] hero follows the hovered card', followed);
     await page.click('.frostHero-btn[title="Favorite"]');
     const pressed = await page.getAttribute('.frostHero-btn[title="Favorite"]', 'aria-pressed');
-    check('[desktop] favorite button toggles', pressed === 'false', pressed); // Saltwater Kings starts as a favorite
+    check('[desktop] favorite button toggles', pressed === 'false', pressed); // Tears of Steel starts as a favorite
   }
 
   // A hostile item name must render as text, never as markup

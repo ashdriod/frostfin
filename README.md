@@ -22,7 +22,7 @@ floating glass tab bar, and posters that lift toward you when focused.
   </tr>
 </table>
 
-<sub>Screenshots use the built-in demo with a made-up library and generated artwork.</sub>
+<sub>Screenshots show the built-in demo with the Blender Foundation's open movies. Artwork © Blender Foundation / Blender Studio, CC BY ([sources](demo/media/SOURCES.md)).</sub>
 
 ## Features
 
@@ -159,7 +159,7 @@ src/css/00-elegantfin-base.css   ElegantFin base layer, kept verbatim. Don't edi
 src/css/10-glass.css             The glass layer. Edit this
 src/js/theme.js                  Companion script
 dist/                            Built output, committed so jsDelivr can serve it
-demo/                            Demo Home page with a fictional library
+demo/                            Demo Home page with Blender's open movies
 scripts/                         Build, demo server, smoke test, screenshots
 ```
 
@@ -181,6 +181,7 @@ real server too. [CONTRIBUTING.md](CONTRIBUTING.md) explains how releases are ma
 
 - [ElegantFin](https://github.com/lscambo13/ElegantFin) by lscambo13: the base layer (GPL-2.0).
 - [JellyfinGlassTheme](https://github.com/MadhavKrishanGoswami/JellyfinGlassTheme) by Madhav Krishan Goswami: structure and plugin styling (MIT).
+- Demo artwork: the [Blender Foundation](https://studio.blender.org)'s open movies, CC BY.
 
 This is an unofficial theme and is not affiliated with the Jellyfin project.
 

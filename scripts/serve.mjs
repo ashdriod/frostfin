@@ -1,35 +1,24 @@
 // Local demo server: serves demo/ and dist/, and fakes Jellyfin's image API
-// (/Items/{id}/Images/{type}) with generated artwork from demo/art.mjs.
+// (/Items/{id}/Images/{type}) with the artwork in demo/media/.
 //   npm run demo   ->  http://127.0.0.1:8099/
 // Listens on loopback only.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { join, normalize, extname, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scene, poster, logo } from '../demo/art.mjs';
 import { BY_ID } from '../demo/data.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg' };
 const PUBLIC = ['demo', 'dist'];
-const svgCache = new Map();
+// Jellyfin image type -> file in demo/media/<slug>/
+const FILES = { Primary: 'poster.jpg', Logo: 'logo.png', Backdrop: 'backdrop.jpg', Thumb: 'backdrop.jpg' };
 
-function image(id, type, q) {
+function imagePath(id, type) {
   const item = BY_ID[id];
   if (!item) return null;
-  const key = `${id}/${type}/${q.get('fillWidth') || ''}x${q.get('fillHeight') || ''}`;
-  if (svgCache.has(key)) return svgCache.get(key);
-  let svg;
-  if (type === 'Logo') svg = logo(item);
-  else if (type === 'Primary' && item.Type !== 'Episode') svg = poster(item);
-  else {
-    // Backdrop / Thumb / episode stills: 16:9 scene at the requested size
-    const w = Math.min(3840, Math.max(320, Number(q.get('fillWidth') || q.get('maxWidth')) || 1920));
-    const h = Math.round(Number(q.get('fillHeight')) || (w * 9) / 16);
-    svg = scene(type === 'Backdrop' || item.Type === 'Episode' ? item : { ...item, Id: item.Id + 'thumb' }, w, h);
-  }
-  svgCache.set(key, svg);
-  return svg;
+  if (type === 'Primary' && !item.ImageTags.Primary) return null;
+  return join(root, 'demo/media', item.slug, FILES[type]);
 }
 
 export function start(port = Number(process.env.PORT) || 8099) {
@@ -44,8 +33,13 @@ export function start(port = Number(process.env.PORT) || 8099) {
 
     const img = url.pathname.match(/^\/demo-server\/Items\/([\w-]+)\/Images\/(Primary|Backdrop|Logo|Thumb)(?:\/\d+)?$/);
     if (img) {
-      const svg = image(img[1], img[2], url.searchParams);
-      return svg ? send(200, svg, 'image/svg+xml') : send(404, 'No such item');
+      const file = imagePath(img[1], img[2]);
+      if (!file) return send(404, 'No such image');
+      try {
+        return send(200, await readFile(file), TYPES[extname(file)]);
+      } catch {
+        return send(404, 'No such image');
+      }
     }
 
     let rel = normalize(decodeURIComponent(url.pathname)).replace(/^[/\\]+/, '');

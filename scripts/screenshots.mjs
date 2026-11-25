@@ -1,4 +1,4 @@
-// Renders docs/screenshots/*.jpg from the demo (fictional library).
+// Renders docs/screenshots/*.jpg from the demo (Blender open movies).
 //   npm run screenshots            all shots
 //   npm run screenshots -- home    only shots whose name contains "home"
 import { mkdirSync } from 'node:fs';
@@ -36,17 +36,17 @@ async function hoverCard(page, name) {
 const shots = [
   { name: 'home-desktop', viewport: { width: 1920, height: 1080 }, run: async (p) => {} },
   { name: 'home-hover', viewport: { width: 1920, height: 1080 }, run: async (p) => {
-    await hoverCard(p, 'Neon Tide');
+    await hoverCard(p, 'Sprite Fright');
   } },
   { name: 'home-rows', viewport: { width: 1920, height: 1080 }, run: async (p) => {
     await p.evaluate(() => window.scrollTo(0, document.querySelector('.section2').offsetTop - 140));
-    await hoverCard(p, 'Saltwater Kings');
+    await hoverCard(p, 'Tears of Steel');
     await p.evaluate(() => window.scrollTo(0, document.querySelector('.section1').offsetTop - 40));
     await p.waitForTimeout(500);
   } },
   { name: 'home-tv', query: '?tv', viewport: { width: 1920, height: 1080 }, run: async (p) => {
     await p.locator('.section1 .card').nth(3).focus();
-    await p.waitForFunction(() => document.querySelector('.frostHero-logo')?.alt === 'Orbit of Ash');
+    await p.waitForFunction(() => document.querySelector('.frostHero-logo')?.alt === 'Cosmos Laundromat');
     await p.waitForTimeout(1000);
   } },
   { name: 'home-mobile', query: '?mobile', viewport: { width: 390, height: 844 }, scale: 3, mobile: true, run: async (p) => {} },

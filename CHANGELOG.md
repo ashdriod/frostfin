@@ -6,6 +6,9 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- The demo and screenshots now use the Blender Foundation's open movies (CC BY) instead of generated artwork.
+
 ## [1.0.0] - 2026-11-24
 
 ### Added
